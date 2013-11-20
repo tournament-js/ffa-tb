@@ -2,9 +2,12 @@ var FFA = require('ffa');
 var TieBreaker = require('tiebreaker');
 var Dynamic = require('dynamic-tournament');
 
+// TODO: if limit, set, don't force the limit downwards, but tiebreak the final
+// though still enforce limit divisible my number of final matches
 function DynamicFFA(numPlayers, opts) {
   this.numPlayers = numPlayers;
   opts = FFA.defaults(numPlayers, opts);
+  // need to make sure we could have created this as a plain FFA with adv limits
   var invReason = FFA.invalid(numPlayers, opts);
   if (invReason !== null) {
     console.error("Invalid %d player DynamicFFA with opts=%j rejected",
@@ -39,16 +42,19 @@ DynamicFFA.configure({
   }
 });*/
 
-// NB: don't need _verify (no extra restrictions)
-// NB: don't need progress (all done via _createNext)
-
+// TODO: account for final round limit?
+DynamicFFA.prototype.isDone = function () {
+  return (!this.opts.sizes[this.ffaIdx+1] && this._trn.isDone());
+};
 DynamicFFA.prototype._createNext = function () {
+  if (this.isDone()) {
+    return null;
+  }
   // if need tiebreaker (can happen from both tournaments) tiebreak
   var adv = this.opts.advancers[this.ffaIdx] * this._trn.matches.length;
   // NB: we keep tiebreaking until there's nothing to tiebreak
   // and we will only need within breakers here because of how `adv` works in FFA
   var tb = TieBreaker.from(this._trn, adv, { nonStrict: true });
-  console.log('making new stage:', tb.matches.length ? 'tiebreaker' : 'new ffa round');
 
   if (tb.matches.length > 0) {
     return tb; // we needed to tiebreak :(
@@ -58,6 +64,7 @@ DynamicFFA.prototype._createNext = function () {
     this.ffaIdx += 1;
     return new FFA(adv, { sizes: [nextSize] });
   }
+  return null;
 };
 
 

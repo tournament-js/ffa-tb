@@ -5,24 +5,27 @@ test("forwarding 16 [4,4,4,4]", function (t) {
   var d = new DFFA(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
   t.ok(!d.stageComplete(), 'need to play first round');
 
-  var expR1 = [
-    { id: { s: 1, r: 1, m: 1, t: 1 }, p: [ 1, 5, 12, 16 ] },
-    { id: { s: 1, r: 1, m: 2, t: 1 }, p: [ 2, 6, 11, 15 ] },
-    { id: { s: 1, r: 1, m: 3, t: 1 }, p: [ 3, 7, 10, 14 ] },
-    { id: { s: 1, r: 1, m: 4, t: 1 }, p: [ 4, 8, 9, 13 ] }
-  ];
+  var ensureMiddleBoundaries = function (d) {
+    t.ok(d.stageComplete(), 'can start next stage now');
+    t.ok(!d.isDone(), "dynamic FFA not complete");
+    t.ok(d.createNextStage(), "could create next stage");
+    t.ok(!d.stageComplete(), 'need to play second round');
+  };
+
   // score s.t. no tiebreakers necessary this round
   // NB: can use .matches here, but not deceptive why this works...
   d.matches.forEach(function (m, i) {
     d.score(m.id, [4,4,4,1]);
-    expR1[i].m = [4,4,4,1]; // ensure scores get saved when using .currentStage()
   });
-
+  var expR1 = [
+    { id: { s: 1, r: 1, m: 1, t: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
+    { id: { s: 1, r: 1, m: 2, t: 1 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
+    { id: { s: 1, r: 1, m: 3, t: 1 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
+    { id: { s: 1, r: 1, m: 4, t: 1 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
+  ]; // do it after scoring once to see we actually get the used matches
   t.deepEqual(d.currentStage(), expR1, "first stage is all 16 players");
 
-  t.ok(d.stageComplete(), 'can start next stage now');
-  d.createNextStage();
-  t.ok(!d.stageComplete(), 'need ot play second round');
+  ensureMiddleBoundaries(d);
 
   var expR2 = [
     { id: { s: 1, r: 1, m: 1, t: 2 }, p: [ 1, 4, 9, 12 ] },
@@ -35,8 +38,7 @@ test("forwarding 16 [4,4,4,4]", function (t) {
     d.score(m.id, [4,3,3,1]); // this should cause tiebreakers between 2nds and 3rds
   });
 
-  t.ok(d.stageComplete(), 'can start next stage now');
-  d.createNextStage();
+  ensureMiddleBoundaries(d);
 
   // know this is sufficient to verify it's a TB because 1st placers not present
   var expR3Tb = [
@@ -45,14 +47,13 @@ test("forwarding 16 [4,4,4,4]", function (t) {
     { id : { t: 3, s: 3, r: 1, m: 1 }, p : [6,7] }
   ];
   t.deepEqual(d.currentStage(), expR3Tb, "current stage is a tiebreaker");
-  t.ok(!d.stageComplete(), 'need to play the TB');
 
   d.currentStage().forEach(function (m) {
     d.score(m.id, [2,2]); // should ensure another tiebreaker - nothing resolved
   });
-  t.ok(d.stageComplete(), 'tiebreaker done - albeit unsatisfactory');
-  d.createNextStage();
-  t.ok(!d.stageComplete(), 'need to re-play the TB');
+
+  ensureMiddleBoundaries(d);
+
   var expR4Tb = expR3Tb.map(function (m) {
     m.id.t += 1;
     return m;
@@ -62,10 +63,9 @@ test("forwarding 16 [4,4,4,4]", function (t) {
   d.currentStage().forEach(function (m) {
     d.score(m.id, [2,1]); // resolve ties now
   });
-  t.ok(d.stageComplete(), 'tiebreaker done - satisfactory');
-  d.createNextStage();
 
-  t.ok(!d.stageComplete(), 'need to play FFA semis');
+  ensureMiddleBoundaries(d);
+
   var expR5 = [
     { id: { t: 5, s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
     { id: { t: 5, s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
@@ -75,19 +75,20 @@ test("forwarding 16 [4,4,4,4]", function (t) {
   d.currentStage().forEach(function (m, i) {
     d.score(m.id, [3,3,1]); // top 2 progresses
   });
-  t.ok(d.stageComplete(), 'FFA R3 done');
-  d.createNextStage();
-  t.ok(!d.stageComplete(), 'need to play FFA final');
+
+  ensureMiddleBoundaries(d);
 
   t.deepEqual(d.currentStage(), [{
     id: { t: 6, s: 1, r: 1, m: 1 }, p: [1,2,3,4]
   }], "final match contains the top 4");
 
   var f = d.currentStage()[0];
-  d.score(f.id, [4,3,2,1]);
-  t.ok(d.stageComplete(), "final FFA complete");
+  d.score(f.id, [4,3,2,1]); // TODO: what about final round ties? - limits?
 
-  // TODO: somehow check that we can not create another stage here..
+  // ensure everthing done
+  t.ok(d.stageComplete(), "final FFA complete");
+  t.ok(d.isDone(), "dynamic FFA complete");
+  t.ok(!d.createNextStage(), "can't create more stages");
 
   t.end();
 });
