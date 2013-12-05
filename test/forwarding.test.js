@@ -1,8 +1,8 @@
-var DFFA = require('../');
+var FfaTb = require('../');
 var test = require('tap').test;
 
 test("forwarding 16 [4,4,4,4]", function (t) {
-  var d = new DFFA(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
+  var d = new FfaTb(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
   t.ok(!d.stageComplete(), 'need to play first round');
 
   var ensureMiddleBoundaries = function (d) {

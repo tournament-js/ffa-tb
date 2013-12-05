@@ -1,32 +1,32 @@
 var FFA = require('ffa');
 var TieBreaker = require('tiebreaker');
-var Dynamic = require('dynamic-tournament');
+var Tourney = require('tourney');
 
 // TODO: if limit, set, don't force the limit downwards, but tiebreak the final
 // though still enforce limit divisible my number of final matches
-function DynamicFFA(numPlayers, opts) {
+function FfaTb(numPlayers, opts) {
   this.numPlayers = numPlayers;
   opts = FFA.defaults(numPlayers, opts);
   // need to make sure we could have created this as a plain FFA with adv limits
   var invReason = FFA.invalid(numPlayers, opts);
   if (invReason !== null) {
-    console.error("Invalid %d player DynamicFFA with opts=%j rejected",
+    console.error("Invalid %d player FfaTb with opts=%j rejected",
       numPlayers, opts
     );
-    throw new Error("Cannot construct DynamicFFA: " + invReason);
+    throw new Error("Cannot construct FfaTb: " + invReason);
   }
   var ffa0 = new FFA(this.numPlayers, { sizes: [opts.sizes[0]] });
   this.opts = opts;
   this.ffaIdx = 0;
-  Dynamic.call(this, ffa0);
+  Tourney.call(this, ffa0);
 }
-DynamicFFA.idString = function (id) {
+FfaTb.idString = function (id) {
   return [id.t, id.s, id.r, id.m].join('-');
 }
-Dynamic.inherit(DynamicFFA, Dynamic);
+Tourney.inherit(FfaTb, Tourney);
 
 /*
-DynamicFFA.configure({
+FfaTb.configure({
   defaults: function (np, opts) {
     opts = FFA.defaults(opts);
     // TODO: add own options on top?
@@ -43,10 +43,10 @@ DynamicFFA.configure({
 });*/
 
 // TODO: account for final round limit?
-DynamicFFA.prototype.isDone = function () {
+FfaTb.prototype.isDone = function () {
   return (!this.opts.sizes[this.ffaIdx+1] && this._trn.isDone());
 };
-DynamicFFA.prototype._createNext = function () {
+FfaTb.prototype._createNext = function () {
   if (this.isDone()) {
     return null;
   }
@@ -70,4 +70,4 @@ DynamicFFA.prototype._createNext = function () {
 
 // TODO: results - how the fuck
 
-module.exports = DynamicFFA;
+module.exports = FfaTb;
