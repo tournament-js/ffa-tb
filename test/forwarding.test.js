@@ -18,19 +18,19 @@ test("forwarding 16 [4,4,4,4]", function (t) {
     d.score(m.id, [4,4,4,1]);
   });
   var expR1 = [
-    { id: { s: 1, r: 1, m: 1, t: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
-    { id: { s: 1, r: 1, m: 2, t: 1 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
-    { id: { s: 1, r: 1, m: 3, t: 1 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
-    { id: { s: 1, r: 1, m: 4, t: 1 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
+    { id: { s: 1, p: 1, r: 1, m: 1, t: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
+    { id: { s: 1, p: 1, r: 1, m: 2, t: 1 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
+    { id: { s: 1, p: 1, r: 1, m: 3, t: 1 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
+    { id: { s: 1, p: 1, r: 1, m: 4, t: 1 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
   ]; // do it after scoring once to see we actually get the used matches
   t.deepEqual(d.currentStage(), expR1, "first stage is all 16 players");
 
   ensureMiddleBoundaries(d);
 
   var expR2 = [
-    { id: { s: 1, r: 1, m: 1, t: 2 }, p: [ 1, 4, 9, 12 ] },
-    { id: { s: 1, r: 1, m: 2, t: 2 }, p: [ 2, 5, 8, 11 ] },
-    { id: { s: 1, r: 1, m: 3, t: 2 }, p: [ 3, 6, 7, 10 ] }
+    { id: { s: 1, p: 1, r: 1, m: 1, t: 2 }, p: [ 1, 4, 9, 12 ] },
+    { id: { s: 1, p: 1, r: 1, m: 2, t: 2 }, p: [ 2, 5, 8, 11 ] },
+    { id: { s: 1, p: 1, r: 1, m: 3, t: 2 }, p: [ 3, 6, 7, 10 ] }
   ];
   t.deepEqual(d.currentStage(), expR2, "current stage gets the top 3*16/4 pls");
 
@@ -42,9 +42,9 @@ test("forwarding 16 [4,4,4,4]", function (t) {
 
   // know this is sufficient to verify it's a TB because 1st placers not present
   var expR3Tb = [
-    { id : { t: 3, s: 1, r: 1, m: 1 }, p : [4,9] },
-    { id : { t: 3, s: 2, r: 1, m: 1 }, p : [5,8] },
-    { id : { t: 3, s: 3, r: 1, m: 1 }, p : [6,7] }
+    { id : { t: 3, p: 1, s: 1, r: 1, m: 1 }, p : [4,9] },
+    { id : { t: 3, p: 1, s: 2, r: 1, m: 1 }, p : [5,8] },
+    { id : { t: 3, p: 1, s: 3, r: 1, m: 1 }, p : [6,7] }
   ];
   t.deepEqual(d.currentStage(), expR3Tb, "current stage is a tiebreaker");
 
@@ -67,8 +67,8 @@ test("forwarding 16 [4,4,4,4]", function (t) {
   ensureMiddleBoundaries(d);
 
   var expR5 = [
-    { id: { t: 5, s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
-    { id: { t: 5, s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
+    { id: { t: 5, p: 1, s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
+    { id: { t: 5, p: 1, s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
   ];
   t.deepEqual(d.currentStage(), expR5, "3rd FFA round");
 
@@ -79,7 +79,7 @@ test("forwarding 16 [4,4,4,4]", function (t) {
   ensureMiddleBoundaries(d);
 
   t.deepEqual(d.currentStage(), [{
-    id: { t: 6, s: 1, r: 1, m: 1 }, p: [1,2,3,4]
+    id: { t: 6, p: 1, s: 1, r: 1, m: 1 }, p: [1,2,3,4]
   }], "final match contains the top 4");
 
   var f = d.currentStage()[0];
