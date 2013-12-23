@@ -22,7 +22,7 @@ function FfaTb(numPlayers, opts) {
 }
 FfaTb.idString = function (id) {
   return [id.t, id.s, id.r, id.m].join('-');
-}
+};
 Tourney.inherit(FfaTb, Tourney);
 
 /*
@@ -65,6 +65,16 @@ FfaTb.prototype._createNext = function () {
     return [new FFA(adv, { sizes: [nextSize] })];
   }
   return [];
+};
+
+FfaTb.prototype.currentRound = function () {
+  var stg = this.currentStage();
+  return stg.length && stg[0];
+};
+
+FfaTb.prototype.isTieBreakerRound = function () {
+  var curr = this.currentRound();
+  return curr && curr.name === 'TieBreaker';
 };
 
 

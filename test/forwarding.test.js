@@ -2,93 +2,120 @@ var FfaTb = require('../');
 var test = require('tap').test;
 
 test("forwarding 16 [4,4,4,4]", function (t) {
-  var d = new FfaTb(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
-  t.ok(!d.stageComplete(), 'need to play first round');
+  var trn = new FfaTb(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
+  t.ok(!trn.stageComplete(), 'need to play first round');
 
-  var ensureMiddleBoundaries = function (d) {
-    t.ok(d.stageComplete(), 'can start next stage now');
-    t.ok(!d.isDone(), "dynamic FFA not complete");
-    t.ok(d.createNextStage(), "could create next stage");
-    t.ok(!d.stageComplete(), 'need to play second round');
+  var verifyStageProgression = function () {
+    t.ok(trn.stageComplete(), 'can start next stage now');
+    t.ok(!trn.isDone(), "dynamic FFA not complete");
+    t.ok(trn.createNextStage(), "could create next stage");
+    t.ok(!trn.stageComplete(), 'need to play second round');
   };
 
   // score s.t. no tiebreakers necessary this round
   // NB: can use .matches here, but not deceptive why this works...
-  d.matches.forEach(function (m, i) {
-    d.score(m.id, [4,4,4,1]);
+  var d1 = trn.currentRound();
+  t.ok(!trn.isTieBreakerRound(), "ffa round 1");
+  d1.matches.forEach(function (m) {
+    d1.score(m.id, [4,4,4,1]);
   });
+
+  t.deepEqual(trn.matches, [], 'no stages copied yet yet');
+
   var expR1 = [
-    { id: { s: 1, p: 1, r: 1, m: 1, t: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
-    { id: { s: 1, p: 1, r: 1, m: 2, t: 1 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
-    { id: { s: 1, p: 1, r: 1, m: 3, t: 1 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
-    { id: { s: 1, p: 1, r: 1, m: 4, t: 1 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
+    { id: { t: 1, p: 1, s: 1, r: 1, m: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
+    { id: { t: 1, p: 1, s: 1, r: 1, m: 2 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
+    { id: { t: 1, p: 1, s: 1, r: 1, m: 3 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
+    { id: { t: 1, p: 1, s: 1, r: 1, m: 4 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
   ]; // do it after scoring once to see we actually get the used matches
-  t.deepEqual(d.currentStage(), expR1, "first stage is all 16 players");
 
-  ensureMiddleBoundaries(d);
+  verifyStageProgression();
 
+  t.deepEqual(trn.matches, expR1, "first stage copied into global matches array");
+
+  var d2 = trn.currentRound();
+  t.ok(!trn.isTieBreakerRound(), "ffa round 2");
   var expR2 = [
-    { id: { s: 1, p: 1, r: 1, m: 1, t: 2 }, p: [ 1, 4, 9, 12 ] },
-    { id: { s: 1, p: 1, r: 1, m: 2, t: 2 }, p: [ 2, 5, 8, 11 ] },
-    { id: { s: 1, p: 1, r: 1, m: 3, t: 2 }, p: [ 3, 6, 7, 10 ] }
+    { id: { s: 1, r: 1, m: 1 }, p: [ 1, 4, 9, 12 ] },
+    { id: { s: 1, r: 1, m: 2 }, p: [ 2, 5, 8, 11 ] },
+    { id: { s: 1, r: 1, m: 3 }, p: [ 3, 6, 7, 10 ] }
   ];
-  t.deepEqual(d.currentStage(), expR2, "current stage gets the top 3*16/4 pls");
+  t.deepEqual(d2.matches, expR2, "current stage gets the top 3*16/4 pls");
 
-  d.currentStage().forEach(function (m) {
-    d.score(m.id, [4,3,3,1]); // this should cause tiebreakers between 2nds and 3rds
+  d2.matches.forEach(function (m) {
+    d2.score(m.id, [4,3,3,1]); // causes tiebreakers between 2nds and 3rds
   });
 
-  ensureMiddleBoundaries(d);
+  verifyStageProgression();
+
+  t.equal(trn.matches.length, expR1.length + expR2.length, "round 2 copied in");
+  expR2.forEach(function (m) {
+    m.id.t = 2;
+    m.id.p = 1;
+    m.m = [4,3,3,1];
+  });
+  t.deepEqual(trn.matches.slice(expR1.length), expR2, "r2 matches extended in d");
+
 
   // know this is sufficient to verify it's a TB because 1st placers not present
   var expR3Tb = [
-    { id : { t: 3, p: 1, s: 1, r: 1, m: 1 }, p : [4,9] },
-    { id : { t: 3, p: 1, s: 2, r: 1, m: 1 }, p : [5,8] },
-    { id : { t: 3, p: 1, s: 3, r: 1, m: 1 }, p : [6,7] }
+    { id : { s: 1, r: 1, m: 1 }, p : [4,9] },
+    { id : { s: 2, r: 1, m: 1 }, p : [5,8] },
+    { id : { s: 3, r: 1, m: 1 }, p : [6,7] }
   ];
-  t.deepEqual(d.currentStage(), expR3Tb, "current stage is a tiebreaker");
+  var d3 = trn.currentRound();
+  t.ok(trn.isTieBreakerRound(), "tb round 1");
+  t.deepEqual(d3.matches, expR3Tb, "current stage is a tiebreaker");
 
-  d.currentStage().forEach(function (m) {
-    d.score(m.id, [2,2]); // should ensure another tiebreaker - nothing resolved
+  d3.matches.forEach(function (m) {
+    d3.score(m.id, [2,2]); // should ensure another tiebreaker - nothing resolved
   });
 
-  ensureMiddleBoundaries(d);
+  verifyStageProgression();
 
-  var expR4Tb = expR3Tb.map(function (m) {
-    m.id.t += 1;
-    return m;
-  })
-  t.deepEqual(d.currentStage(), expR4Tb, "essentially same matches as R3");
+  var d4 = trn.currentRound();
+  t.ok(trn.isTieBreakerRound(), "tb round 2");
+  t.deepEqual(d4.matches, expR3Tb, "r4TB === r3TB");
 
-  d.currentStage().forEach(function (m) {
-    d.score(m.id, [2,1]); // resolve ties now
+  d4.matches.forEach(function (m) {
+    d4.score(m.id, [2,1]); // resolve ties now
   });
 
-  ensureMiddleBoundaries(d);
+  verifyStageProgression();
 
   var expR5 = [
-    { id: { t: 5, p: 1, s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
-    { id: { t: 5, p: 1, s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
+    { id: { s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
+    { id: { s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
   ];
-  t.deepEqual(d.currentStage(), expR5, "3rd FFA round");
+  var d5 = trn.currentRound();
+  t.ok(!trn.isTieBreakerRound(), "ffa round 3");
+  t.deepEqual(d5.matches, expR5, "3rd FFA round matches");
 
-  d.currentStage().forEach(function (m, i) {
-    d.score(m.id, [3,3,1]); // top 2 progresses
+  d5.matches.forEach(function (m) {
+    d5.score(m.id, [3,3,1]); // top 2 progresses
   });
 
-  ensureMiddleBoundaries(d);
+  verifyStageProgression();
 
-  t.deepEqual(d.currentStage(), [{
-    id: { t: 6, p: 1, s: 1, r: 1, m: 1 }, p: [1,2,3,4]
+
+  var d6 = trn.currentRound();
+  t.ok(!trn.isTieBreakerRound(), "ffa round 4");
+  t.deepEqual(d6.matches, [{
+    id: { s: 1, r: 1, m: 1 },
+    p: [1,2,3,4]
   }], "final match contains the top 4");
 
-  var f = d.currentStage()[0];
-  d.score(f.id, [4,3,2,1]); // TODO: what about final round ties? - limits?
+  var f = d6.matches[0];
+  d6.score(f.id, [4,3,2,1]); // TODO: what about final round ties? - limits?
 
   // ensure everthing done
-  t.ok(d.stageComplete(), "final FFA complete");
-  t.ok(d.isDone(), "dynamic FFA complete");
-  t.ok(!d.createNextStage(), "can't create more stages");
+  t.ok(trn.stageComplete(), "final FFA complete");
+  t.ok(trn.isDone(), "dynamic FFA complete");
+  t.ok(!trn.createNextStage(), "can't create more stages");
+
+  t.deepEqual(trn.matches[trn.matches.length-1].id, { t: 6, p: 1, s: 1, r: 1, m: 1 }
+    , "final match copied in correct location"
+  );
 
   t.end();
 });
