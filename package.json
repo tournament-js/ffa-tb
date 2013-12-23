@@ -16,7 +16,7 @@
     "test": "tap test/*.js"
   },
   "dependencies": {
-    "tourney": "0.1.0",
+    "tourney": "0.2.0",
     "tiebreaker": "~0.4.0",
     "ffa": "~0.6.0"
   },
