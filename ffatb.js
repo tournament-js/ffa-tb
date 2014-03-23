@@ -15,7 +15,10 @@ function FfaTb(numPlayers, opts) {
     );
     throw new Error("Cannot construct FfaTb: " + invReason);
   }
+  this._ffaAry = [];
   var ffa0 = new FFA(this.numPlayers, { sizes: [opts.sizes[0]] });
+  this._ffaAry.push(ffa0);
+
   this.opts = opts;
   this.ffaIdx = 0;
   Tourney.call(this, [ffa0]);
@@ -51,7 +54,7 @@ FfaTb.prototype._createNext = function () {
     return [];
   }
   // if need tiebreaker (can happen from both tournaments) tiebreak
-  var adv = this.opts.advancers[this.ffaIdx] * this._trns[0].matches.length;
+  var adv = this.opts.advancers[this.ffaIdx] * this._ffaAry[this.ffaIdx].matches.length;
   // NB: we keep tiebreaking until there's nothing to tiebreak
   // and we will only need within breakers here because of how `adv` works in FFA
   var tb = TieBreaker.from(this._trns[0], adv, { nonStrict: true });
@@ -62,7 +65,9 @@ FfaTb.prototype._createNext = function () {
   var nextSize = this.opts.sizes[this.ffaIdx+1];
   if (nextSize) {
     this.ffaIdx += 1;
-    return [new FFA(adv, { sizes: [nextSize] })];
+    var nextFfa = FFA.from(this._trns[0], adv, { sizes: [nextSize] });
+    this._ffaAry.push(nextFfa);
+    return [nextFfa];
   }
   return [];
 };
