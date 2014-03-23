@@ -83,17 +83,16 @@ test("results 8 [4,4] with ties", function (t) {
     delete r.gpos;
   });
 
-  // TODO: currently does not work because when we tiebreak
-  // some wins are added twice (knocked out twice..)
+  // scored differently => different results, but tiebreakers does not matter
   t.deepEqual(res, [
       { seed: 1, wins: 2, for: 8, against: 0, pos: 1 }, // 4 in both
       { seed: 2, wins: 1, for: 7, against: 1, pos: 2 }, // 4 + 3
-      { seed: 3, wins: 0, for: 5, against: 3, pos: 3 }, // 3 + 2
+      { seed: 3, wins: 1, for: 6, against: 2, pos: 3 }, // 4 + 2
       { seed: 4, wins: 0, for: 4, against: 4, pos: 4 }, // 3 + 1
-      { seed: 5, wins: 0, for: 2, against: 2, pos: 5 }, // 2
+      { seed: 5, wins: 0, for: 3, against: 1, pos: 5 }, // 3 - but knocked out
       { seed: 6, wins: 0, for: 2, against: 2, pos: 5 }, // 2
-      { seed: 7, wins: 0, for: 1, against: 3, pos: 7 }, // 1
-      { seed: 8, wins: 0, for: 1, against: 3, pos: 7 }, // 1
+      { seed: 8, wins: 0, for: 2, against: 2, pos: 5 }, // 1 - upgraded in TB
+      { seed: 7, wins: 0, for: 1, against: 3, pos: 8 }  // 1
     ], "final results"
   );
 

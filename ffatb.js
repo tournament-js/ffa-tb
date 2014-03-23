@@ -102,8 +102,12 @@ Tourney.prototype.results = function () {
     // players not in current stage exist in previous results below
     return !resultEntry(currRes, r.seed);
   });
-  // TODO: what to do about .gpos?
 
+  if (this.isTieBreakerRound()) {
+    return currRes; // TieBreaker modifies complete FFA results
+  }
+
+  // TODO: what to do about .gpos?
   var oldRes = this._oldRes;
   return currRes.map(function (r) {
     var old = resultEntry(oldRes, r.seed);
