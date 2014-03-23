@@ -16,10 +16,7 @@ test("results 8 [4,4] without ties", function (t) {
 
   trn.createNextStage();
   var r2 = trn.currentRound();
-  t.deepEqual(r2.matches, [
-      { id : { s: 1, r: 1, m: 1 }, p: [1,2,3,4] },
-    ], "r2 match"
-  );
+  t.deepEqual(r2.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,4] }], "r2 match");
 
   r2.score(r2.matches[0].id, [4,3,2,1]);
 
@@ -59,10 +56,7 @@ test("results 8 [4,4] with ties", function (t) {
   trn.createNextStage();
   t.ok(trn.isTieBreakerRound(), 'need to break the second match');
   var tb = trn.currentRound();
-  t.deepEqual(tb.matches, [
-    { id: { s: 2, r: 1, m: 1 }, p: [4,5] }
-    ], "tb match"
-  );
+  t.deepEqual(tb.matches, [{ id: { s: 2, r: 1, m: 1 }, p: [4,5] }], "tb match");
   t.ok(tb.score(tb.matches[0].id, [1,2]), 'score tb');
   t.ok(tb.isDone(), 'tb is done');
   // NB: scoring should not affect .for and .against
@@ -70,11 +64,7 @@ test("results 8 [4,4] with ties", function (t) {
   t.ok(trn._ready, 'should be able to create next')
   t.ok(trn.createNextStage(), 'could create next stage');
   var r2 = trn.currentRound();
-  t.deepEqual(r2.matches, [
-      { id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] },
-    ], "r2 match"
-  );
-
+  t.deepEqual(r2.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], "r2 match");
   r2.score(r2.matches[0].id, [4,3,2,1]);
 
   var res = trn.results();
@@ -91,7 +81,7 @@ test("results 8 [4,4] with ties", function (t) {
       { seed: 5, wins: 0, for: 4, against: 4, pos: 4 }, // 3 + 1
       { seed: 4, wins: 0, for: 3, against: 1, pos: 5 }, // 3 : but knocked out
       { seed: 6, wins: 0, for: 2, against: 2, pos: 5 }, // 2
-      { seed: 8, wins: 0, for: 2, against: 2, pos: 5 }, // 1 - upgraded in TB
+      { seed: 8, wins: 0, for: 2, against: 2, pos: 5 }, // 2
       { seed: 7, wins: 0, for: 1, against: 3, pos: 8 }  // 1
     ], "final results"
   );
