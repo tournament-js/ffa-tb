@@ -1,6 +1,7 @@
 var FFA = require('ffa');
 var TieBreaker = require('tiebreaker');
 var Tourney = require('tourney');
+var $ = require('autonomy');
 
 // TODO: if limit, set, don't force the limit downwards, but tiebreak the final
 // though still enforce limit divisible my number of final matches
@@ -82,7 +83,39 @@ FfaTb.prototype.isTieBreakerRound = function () {
   return curr && curr.name === 'TieBreaker';
 };
 
+/**
+ * results
+ *
+ * just forwards on FFA results, but keeps the eliminated players where they were
+ * knocked out, thus mimicing normal FFA elimination results.
+ * TieBreaker results modify 
+ */
+var resultEntry = function (res, p) {
+  return $.firstBy(function (r) {
+    return r.seed === p;
+  }, res);
+};
+Tourney.prototype.results = function () {
+  var currRes = this.currentRound().results();
+  // _oldRes maintained as results from previous stage(s)
+  var knockedOutResults = this._oldRes.filter(function (r) {
+    // players not in current stage exist in previous results below
+    return !resultEntry(currRes, r.seed);
+  });
+  // TODO: what to do about .gpos?
 
-// TODO: results - how the fuck
+  var oldRes = this._oldRes;
+  return currRes.map(function (r) {
+    var old = resultEntry(oldRes, r.seed);
+    if (old) {
+      // add up previous results for players still in the tourney
+      r.wins += old.wins;
+      r.for += old.for;
+      r.against += old.against;
+    }
+    return r;
+  }).concat(knockedOutResults); // leave knocked out results as is
+};
+
 
 module.exports = FfaTb;
