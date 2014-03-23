@@ -63,7 +63,7 @@ test("results 8 [4,4] with ties", function (t) {
     { id: { s: 2, r: 1, m: 1 }, p: [4,5] }
     ], "tb match"
   );
-  t.ok(tb.score(tb.matches[0].id, [2,1]), 'score tb');
+  t.ok(tb.score(tb.matches[0].id, [1,2]), 'score tb');
   t.ok(tb.isDone(), 'tb is done');
   // NB: scoring should not affect .for and .against
   
@@ -71,7 +71,7 @@ test("results 8 [4,4] with ties", function (t) {
   t.ok(trn.createNextStage(), 'could create next stage');
   var r2 = trn.currentRound();
   t.deepEqual(r2.matches, [
-      { id : { s: 1, r: 1, m: 1 }, p: [1,2,3,4] },
+      { id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] },
     ], "r2 match"
   );
 
@@ -88,8 +88,8 @@ test("results 8 [4,4] with ties", function (t) {
       { seed: 1, wins: 2, for: 8, against: 0, pos: 1 }, // 4 in both
       { seed: 2, wins: 1, for: 7, against: 1, pos: 2 }, // 4 + 3
       { seed: 3, wins: 1, for: 6, against: 2, pos: 3 }, // 4 + 2
-      { seed: 4, wins: 0, for: 4, against: 4, pos: 4 }, // 3 + 1
-      { seed: 5, wins: 0, for: 3, against: 1, pos: 5 }, // 3 - but knocked out
+      { seed: 5, wins: 0, for: 4, against: 4, pos: 4 }, // 3 + 1
+      { seed: 4, wins: 0, for: 3, against: 1, pos: 5 }, // 3 : but knocked out
       { seed: 6, wins: 0, for: 2, against: 2, pos: 5 }, // 2
       { seed: 8, wins: 0, for: 2, against: 2, pos: 5 }, // 1 - upgraded in TB
       { seed: 7, wins: 0, for: 1, against: 3, pos: 8 }  // 1
