@@ -1,7 +1,6 @@
-var FfaTb = require('../');
-var test = require('tap').test;
+var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
 
-test("forwarding 16 [4,4,4,4]", function (t) {
+exports.forwardingSlowSixteen = function (t) {
   var trn = new FfaTb(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
   t.ok(!trn.stageComplete(), 'need to play first round');
 
@@ -117,5 +116,5 @@ test("forwarding 16 [4,4,4,4]", function (t) {
     , "final match copied in correct location"
   );
 
-  t.end();
-});
+  t.done();
+};

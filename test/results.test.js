@@ -1,7 +1,6 @@
-var FfaTb = require('../');
-var test = require('tap').test;
+var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
 
-test("results 8 [4,4] without ties", function (t) {
+exports.resultsEightFour = function (t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
   var r1 = trn.currentRound();
@@ -37,10 +36,10 @@ test("results 8 [4,4] without ties", function (t) {
     ], "final results"
   );
 
-  t.end();
-});
+  t.done();
+};
 
-test("results 8 [4,4] with ties", function (t) {
+exports.resultsEightFourTies = function (t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
   var r1 = trn.currentRound();
@@ -86,5 +85,5 @@ test("results 8 [4,4] with ties", function (t) {
     ], "final results"
   );
 
-  t.end();
-});
+  t.done();
+};
