@@ -1,7 +1,9 @@
 # FFA-TB
-[![Build Status](https://secure.travis-ci.org/clux/ffa-tb.png)](http://travis-ci.org/clux/ffa-tb)
-[![Dependency Status](https://david-dm.org/clux/ffa-tb.png)](https://david-dm.org/clux/ffa-tb)
-[![experimental](http://hughsk.github.io/stability-badges/dist/experimental.svg)](http://nodejs.org/api/documentation.html#documentation_stability_index)
+[![npm status](http://img.shields.io/npm/v/ffa-tb.svg)](https://www.npmjs.org/package/ffa-tb)
+[![build status](https://secure.travis-ci.org/clux/ffa-tb.svg)](http://travis-ci.org/clux/ffa-tb)
+[![dependency status](https://david-dm.org/clux/ffa-tb.svg)](https://david-dm.org/clux/ffa-tb)
+[![coverage status](http://img.shields.io/coveralls/clux/ffa-tb.svg)](https://coveralls.io/r/clux/ffa-tb)
+[![experimental](http://img.shields.io/badge/stability-experimental-DD5F0A.svg)](http://nodejs.org/api/documentation.html#documentation_stability_index)
 
 An implementation of [tourney](https://github.com/clux/tourney). This module is basically [FFA](https://github.com/clux/ffa) interspersed with [TieBreaker](https://github.com/clux/tiebreaker) rounds after each FFA round to avoid the artificial advancer limit in the fixed size `FFA` [tournament](https://github.com/clux/tournament).
 
