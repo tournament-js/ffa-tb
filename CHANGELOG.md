@@ -1,3 +1,7 @@
+0.2.1 / 2014-XX-XX
+==================
+  * Add coverage
+
 0.2.0 / 2014-03-23
 ==================
   * results now work properly
