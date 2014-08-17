@@ -18,10 +18,10 @@
     "coveralls": "npm run coverage | coveralls"
   },
   "dependencies": {
-    "tourney": "~0.2.2",
-    "tiebreaker": "~0.4.0",
-    "ffa": "~0.6.0",
-    "autonomy": "~0.5.0"
+    "tourney": "^0.2.2",
+    "tiebreaker": "^0.4.1",
+    "ffa": "^0.7.0",
+    "autonomy": "^0.5.1"
   },
   "devDependencies": {
     "coveralls": "^2.11.1",
