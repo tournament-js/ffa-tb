@@ -1,4 +1,4 @@
-0.3.0 / 2014-08-XX
+0.3.0 / 2014-08-18
 ==================
   * `limit` option now works - enforced by repeated non-strict tiebreaking
   * Add coverage
