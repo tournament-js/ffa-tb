@@ -6,8 +6,18 @@ var $ = require('autonomy');
 // TODO: if limit, set, don't force the limit downwards, but tiebreak the final
 // though still enforce limit divisible my number of final matches
 function FfaTb(numPlayers, opts) {
+  if (!(this instanceof FfaTb)) {
+    return new FfaTb(numPlayers, opts);
+  }
   this.numPlayers = numPlayers;
+  opts = opts || {};
+
+  // need to tiebreak final instead of enforcing static limits - so lie to FFA
+  this.limit = opts.limit | 0;
+  var opts2 = $.extend({}, opts); // preserve inputs
+  delete opts2.limit;
   opts = FFA.defaults(numPlayers, opts);
+
   // need to make sure we could have created this as a plain FFA with adv limits
   var invReason = FFA.invalid(numPlayers, opts);
   if (invReason !== null) {
@@ -29,31 +39,30 @@ FfaTb.idString = function (id) {
 };
 Tourney.inherit(FfaTb, Tourney);
 
-/*
-FfaTb.configure({
-  defaults: function (np, opts) {
-    opts = FFA.defaults(opts);
-    // TODO: add own options on top?
-    return opts;
-  },
-  invalid: function (np, opts) {
-    var invReason = FFA.invalid(np, opts);
-    if (invReason !== null) {
-      return invReason;
-    }
-    // TODO: own rejection reasons here
-    return null;
-  }
-});*/
+FfaTb.invalid = FFA.invalid; // no extra restrictions
+FfaTb.defaults = FFA.defaults; // convenience
+
+FfaTb.prototype.inFinalRound = function () {
+  return !this.opts.sizes[this.ffaIdx+1];
+};
 
 // TODO: account for final round limit?
 FfaTb.prototype.isDone = function () {
-  return (!this.opts.sizes[this.ffaIdx+1] && this._trns[0].isDone());
+  var current = this._trns[0];
+  return this.inFinalRound() && current.isDone() && (
+    !this.limit || !TieBreaker.isNecessary(current, this.limit)
+  );
 };
+
 FfaTb.prototype._createNext = function () {
   if (this.isDone()) {
     return [];
   }
+  if (this.inFinalRound() && this._trns[0].isDone() && this.limit > 0)  {
+    var tblast = TieBreaker.from(this._trns[0], this.limit, { nonStrict: true });
+    return [tblast];
+  }
+
   // if need tiebreaker (can happen from both tournaments) tiebreak
   var adv = this.opts.advancers[this.ffaIdx] * this._ffaAry[this.ffaIdx].matches.length;
   // NB: we keep tiebreaking until there's nothing to tiebreak
