@@ -60,7 +60,7 @@ exports.resultsEightFourTies = function (t) {
   t.ok(tb.isDone(), 'tb is done');
   // NB: scoring should not affect .for and .against
   
-  t.ok(trn._ready, 'should be able to create next')
+  t.ok(trn.stageComplete(), 'should be able to create next')
   t.ok(trn.createNextStage(), 'could create next stage');
   var r2 = trn.currentRound();
   t.deepEqual(r2.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], "r2 match");
