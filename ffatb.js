@@ -3,8 +3,6 @@ var TieBreaker = require('tiebreaker');
 var Tourney = require('tourney');
 var $ = require('autonomy');
 
-// TODO: if limit, set, don't force the limit downwards, but tiebreak the final
-// though still enforce limit divisible my number of final matches
 function FfaTb(numPlayers, opts) {
   if (!(this instanceof FfaTb)) {
     return new FfaTb(numPlayers, opts);
@@ -46,7 +44,6 @@ FfaTb.prototype.inFinalRound = function () {
   return !this.opts.sizes[this.ffaIdx+1];
 };
 
-// TODO: account for final round limit?
 FfaTb.prototype.isDone = function () {
   var current = this._trns[0];
   return this.inFinalRound() && current.isDone() && (
