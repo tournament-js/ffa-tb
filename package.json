@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "tourney": "^0.2.2",
-    "tiebreaker": "^0.4.1",
-    "ffa": "^0.7.0",
-    "autonomy": "^0.5.1"
+    "tiebreaker": "^1.0.0",
+    "ffa": "^1.0.0",
+    "autonomy": "^0.5.2"
   },
   "devDependencies": {
     "coveralls": "^2.11.1",

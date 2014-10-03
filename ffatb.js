@@ -53,11 +53,11 @@ FfaTb.prototype.isDone = function () {
 
 FfaTb.prototype._createNext = function () {
   if (this.isDone()) {
-    return [];
+    return null;
   }
   if (this.inFinalRound() && this._trns[0].isDone() && this.limit > 0)  {
     var tblast = TieBreaker.from(this._trns[0], this.limit, { nonStrict: true });
-    return [tblast];
+    return tblast;
   }
 
   // if need tiebreaker (can happen from both tournaments) tiebreak
@@ -67,16 +67,16 @@ FfaTb.prototype._createNext = function () {
   var tb = TieBreaker.from(this._trns[0], adv, { nonStrict: true });
 
   if (tb.matches.length > 0) {
-    return [tb]; // we needed to tiebreak :(
+    return tb; // we needed to tiebreak :(
   }
   var nextSize = this.opts.sizes[this.ffaIdx+1];
   if (nextSize) {
     this.ffaIdx += 1;
     var nextFfa = FFA.from(this._trns[0], adv, { sizes: [nextSize] });
     this._ffaAry.push(nextFfa);
-    return [nextFfa];
+    return nextFfa;
   }
-  return [];
+  return null;
 };
 
 FfaTb.prototype.currentRound = function () {
