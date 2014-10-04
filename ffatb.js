@@ -3,95 +3,76 @@ var TieBreaker = require('tiebreaker');
 var Tourney = require('tourney');
 var $ = require('autonomy');
 
-function FfaTb(numPlayers, opts) {
-  if (!(this instanceof FfaTb)) {
-    return new FfaTb(numPlayers, opts);
-  }
-  this.numPlayers = numPlayers;
-  opts = opts || {};
+var FfaTb = Tourney.sub('FfaTb', function (opts, initParent) {
+  this.ffaStage = 1;
+  this.adv = opts.advancers;
+  this.sizes = opts.sizes;
+  this.limit = opts.limit;
+  initParent(new FFA(this.numPlayers, opts));
+});
 
-  // need to tiebreak final instead of enforcing static limits - so lie to FFA
-  this.limit = opts.limit | 0;
-  var opts2 = $.extend({}, opts); // preserve inputs
-  delete opts2.limit;
-  opts = FFA.defaults(numPlayers, opts);
+FfaTb.configure({
+  defaults: FFA.defaults,
+  invalid: FFA.invalid
+});
 
-  // need to make sure we could have created this as a plain FFA with adv limits
-  var invReason = FFA.invalid(numPlayers, opts);
-  if (invReason !== null) {
-    console.error("Invalid %d player FfaTb with opts=%j rejected",
-      numPlayers, opts
-    );
-    throw new Error("Cannot construct FfaTb: " + invReason);
-  }
-  this._ffaAry = [];
-  var ffa0 = new FFA(this.numPlayers, { sizes: [opts.sizes[0]] });
-  this._ffaAry.push(ffa0);
+//------------------------------------------------------------------
+// Stage identifiers
+//------------------------------------------------------------------
 
-  this.opts = opts;
-  this.ffaIdx = 0;
-  Tourney.call(this, [ffa0]);
-}
-FfaTb.idString = function (id) {
-  return [id.t, id.s, id.r, id.m].join('-');
-};
-Tourney.inherit(FfaTb, Tourney);
-
-FfaTb.invalid = FFA.invalid; // no extra restrictions
-FfaTb.defaults = FFA.defaults; // convenience
-
-FfaTb.prototype.inFinalRound = function () {
-  return !this.opts.sizes[this.ffaIdx+1];
+FfaTb.prototype.inFFA = function () {
+  return this._inst.name === 'FFA';
 };
 
-FfaTb.prototype.isDone = function () {
-  var current = this._trns[0];
-  return this.inFinalRound() && current.isDone() && (
-    !this.limit || !TieBreaker.isNecessary(current, this.limit)
-  );
+FfaTb.prototype.inTieBreaker = function () {
+  return this._inst.name === 'TieBreaker';
+};
+
+FfaTb.prototype.inFinal = function () {
+  return !this.sizes[this.ffaStage];
+};
+
+//------------------------------------------------------------------
+// Expected methods
+//------------------------------------------------------------------
+
+FfaTb.prototype._mustPropagate = function () {
+  // regardless of current instance type:
+  // only stop if last ffa round played and we no longer need tiebreaking
+  return !this.inFinal() ||
+         (!this.limit || !TieBreaker.isNecessary(this._inst, this.limit));
 };
 
 FfaTb.prototype._createNext = function () {
-  if (this.isDone()) {
-    return null;
-  }
-  if (this.inFinalRound() && this._trns[0].isDone() && this.limit > 0)  {
-    var tblast = TieBreaker.from(this._trns[0], this.limit, { nonStrict: true });
-    return tblast;
-  }
-
-  // if need tiebreaker (can happen from both tournaments) tiebreak
-  var adv = this.opts.advancers[this.ffaIdx] * this._ffaAry[this.ffaIdx].matches.length;
-  // NB: we keep tiebreaking until there's nothing to tiebreak
-  // and we will only need within breakers here because of how `adv` works in FFA
-  var tb = TieBreaker.from(this._trns[0], adv, { nonStrict: true });
-
+  // only called when _mustPropagate && stageComplete
+  // regardless of current instance type: if we need tiebreaking tiebreak:
+  var adv = this.inFinal() ?
+    this.limit :
+    this.advancers[this.ffaStage] * this._inst.matches.length ;
+  // keep trying to tiebreak because if it works - we have to do it:
+  var tb = TieBreaker.from(this._inst, adv, { nonStrict: true });
   if (tb.matches.length > 0) {
-    return tb; // we needed to tiebreak :(
+    return tb;
   }
-  var nextSize = this.opts.sizes[this.ffaIdx+1];
-  if (nextSize) {
-    this.ffaIdx += 1;
-    var nextFfa = FFA.from(this._trns[0], adv, { sizes: [nextSize] });
-    this._ffaAry.push(nextFfa);
-    return nextFfa;
+
+  // phew - can actually proceed to next ffaStage now
+  var nextSize = this.sizes[this.ffaStage];
+  // know nextSize is defined because:
+  // a) FFA.invalid didn't stop us
+  // b) _mustPropagate was true => inFinal is false (otherwise would have made tb)
+  if (!nextSize) { // because code change faster than comments:
+    throw new Error("FfaTb instance corrupt: " + JSON.stringify(this));
   }
-  return null;
+  this.ffaStage += 1;
+  return FFA.from(this._inst, adv, { sizes: [nextSize] });
 };
 
-FfaTb.prototype.currentRound = function () {
-  var stg = this.currentStage();
-  return stg.length && stg[0];
-};
-
-FfaTb.prototype.isTieBreakerRound = function () {
-  var curr = this.currentRound();
-  return curr && curr.name === 'TieBreaker';
-};
+//------------------------------------------------------------------
+// Overrides
+//------------------------------------------------------------------
+// TODO: isn't this kind of what we want as default for Tourney?
 
 /**
- * results
- *
  * just forwards on FFA results, but keeps the eliminated players where they were
  * knocked out, thus mimicing normal FFA elimination results.
  * TieBreaker results modify 
@@ -127,5 +108,6 @@ Tourney.prototype.results = function () {
   }).concat(knockedOutResults); // leave knocked out results as is
 };
 
+//------------------------------------------------------------------
 
 module.exports = FfaTb;
