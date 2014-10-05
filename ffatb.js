@@ -82,15 +82,15 @@ var resultEntry = function (res, p) {
     return r.seed === p;
   }, res);
 };
-Tourney.prototype.results = function () {
-  var currRes = this.currentRound().results();
+FfaTb.prototype.results = function () {
+  var currRes = this._inst.results();
   // _oldRes maintained as results from previous stage(s)
   var knockedOutResults = this._oldRes.filter(function (r) {
     // players not in current stage exist in previous results below
     return !resultEntry(currRes, r.seed);
   });
 
-  if (this.isTieBreakerRound()) {
+  if (this.inTieBreaker()) {
     return currRes; // TieBreaker modifies complete FFA results
   }
 
