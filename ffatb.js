@@ -60,12 +60,9 @@ FfaTb.prototype._createNext = function () {
   // know nextSize is defined because:
   // a) FFA.invalid didn't stop us
   // b) _mustPropagate was true => inFinal is false (otherwise would have made tb)
-  if (!nextSize) { // because code change faster than comments:
-    throw new Error("FfaTb instance corrupt: " + JSON.stringify(this));
-  }
   this.ffaStage += 1;
   var ffa = FFA.from(this._inst, adv, { sizes: [nextSize] });
-  this.splits.push(ffa.matches.length);
+  this.splits.push(ffa.matches.length); // keep track so we can work out next adv
   return ffa;
 };
 
