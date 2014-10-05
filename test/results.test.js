@@ -3,22 +3,21 @@ var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
 exports.resultsEightFour = function (t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
-  var r1 = trn.currentRound();
-  t.ok(r1, "we have round 1");
-  t.deepEqual(r1.matches, [
+  t.deepEqual(trn.matches, [
       { id : { s: 1, r: 1, m: 1 }, p: [1,3,6,8] },
       { id : { s: 1, r: 1, m: 2 }, p: [2,4,5,7] }
-    ], "r1 matches"
+    ], "t1 matches"
   );
-  r1.score(r1.matches[0].id, [4,3,2,1]);
-  r1.score(r1.matches[1].id, [4,3,2,1]);
-
+  trn.score(trn.matches[0].id, [4,3,2,1]);
+  trn.score(trn.matches[1].id, [4,3,2,1]);
   trn.createNextStage();
-  var r2 = trn.currentRound();
-  t.deepEqual(r2.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,4] }], "r2 match");
 
-  r2.score(r2.matches[0].id, [4,3,2,1]);
+  // t2 - FFA
+  t.ok(trn.inFFA(), 't2 is FFA');
+  t.deepEqual(trn.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,4] }], "t2");
+  trn.score(trn.matches[0].id, [4,3,2,1]);
 
+  trn.complete(); // this is done now
   var res = trn.results();
   // TODO: that to do about gpos?
   res.forEach(function (r) {
@@ -42,29 +41,30 @@ exports.resultsEightFour = function (t) {
 exports.resultsEightFourTies = function (t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
-  var r1 = trn.currentRound();
-  t.ok(r1, "we have round 1");
-  t.deepEqual(r1.matches, [
+  t.deepEqual(trn.matches, [
       { id : { s: 1, r: 1, m: 1 }, p: [1,3,6,8] },
       { id : { s: 1, r: 1, m: 2 }, p: [2,4,5,7] }
-    ], "r1 matches"
+    ], "t1 matches"
   );
-  r1.score(r1.matches[0].id, [4,4,2,2]);
-  r1.score(r1.matches[1].id, [4,3,3,1]);
-
+  trn.score(trn.matches[0].id, [4,4,2,2]);
+  trn.score(trn.matches[1].id, [4,3,3,1]);
   trn.createNextStage();
-  t.ok(trn.isTieBreakerRound(), 'need to break the second match');
-  var tb = trn.currentRound();
-  t.deepEqual(tb.matches, [{ id: { s: 2, r: 1, m: 1 }, p: [4,5] }], "tb match");
-  t.ok(tb.score(tb.matches[0].id, [1,2]), 'score tb');
-  t.ok(tb.isDone(), 'tb is done');
+
+  // t2 - 2p TieBreaking t1m2 cluster
+  t.ok(trn.inTieBreaker(), 'need to break the second match');
+  t.ok(!trn.inFinal(), 'not final round');
+  t.deepEqual(trn.matches, [{ id: { s: 2, r: 1, m: 1 }, p: [4,5] }], "tb match");
+  t.ok(trn.score(trn.matches[0].id, [1,2]), 'score tb');
+  t.ok(trn.stageDone(), 'tb is done');
   // NB: scoring should not affect .for and .against
-  
-  t.ok(trn.stageComplete(), 'should be able to create next')
   t.ok(trn.createNextStage(), 'could create next stage');
-  var r2 = trn.currentRound();
-  t.deepEqual(r2.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], "r2 match");
-  r2.score(r2.matches[0].id, [4,3,2,1]);
+
+  // t3 - 4p FFA with top 2 from T1M1 + winner of [T1M2, TB]
+  t.deepEqual(trn.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], "t3");
+  trn.score(trn.matches[0].id, [4,3,2,1]);
+
+  t.ok(trn.isDone());
+  trn.complete();
 
   var res = trn.results();
   // TODO: that to do about gpos?

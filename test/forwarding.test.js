@@ -1,120 +1,120 @@
 var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
+var FFA = require('ffa');
+var $ = require('autonomy');
 
 exports.forwardingSlowSixteen = function (t) {
-  var trn = new FfaTb(16, { sizes: [4, 4, 4, 4], advancers: [3, 2, 2] });
-  t.ok(!trn.stageComplete(), 'need to play first round');
+  var ffaOpts = { sizes: [4, 4, 4, 4], advancers: [3, 2, 2], limit: 2 };
+  var trn = new FfaTb(16, ffaOpts);
+  t.ok(!trn.stageDone(), 'need to play first round');
 
   var verifyStageProgression = function () {
-    t.ok(trn.stageComplete(), 'can start next stage now');
-    t.ok(!trn.isDone(), "dynamic FFA not complete");
+    t.ok(trn.stageDone(), 'can start next stage now');
+    t.ok(!trn.isDone(), "tourney not complete");
     t.ok(trn.createNextStage(), "could create next stage");
-    t.ok(!trn.stageComplete(), 'need to play second round');
+    t.ok(!trn.stageDone(), 'need to play second round');
   };
 
-  // score s.t. no tiebreakers necessary this round
-  // NB: can use .matches here, but not deceptive why this works...
-  var d1 = trn.currentRound();
-  t.ok(!trn.isTieBreakerRound(), "ffa round 1");
-  d1.matches.forEach(function (m) {
-    d1.score(m.id, [4,4,4,1]);
+  // t1 - FFA (16p)
+  t.ok(trn.inFFA() && !trn.inTieBreaker() && !trn.inFinal(), 't1 is FFA');
+  var expR1 = FFA(16, { sizes: [4] }).matches;
+  t.deepEqual(trn.matches, expR1, "t1 matches");
+  trn.matches.forEach(function (m) {
+    t.equal(trn.unscorable(m.id, [4,4,4,1]), null, "ok to semi tie-score " + m.id);
+    trn.score(m.id, [4,4,4,1]); // no tiebreakers necessary because top 12 go through
   });
-
-  t.deepEqual(trn.matches, [], 'no stages copied yet yet');
-
-  var expR1 = [
-    { id: { t: 1, p: 1, s: 1, r: 1, m: 1 }, p: [ 1, 5, 12, 16 ], m: [4,4,4,1] },
-    { id: { t: 1, p: 1, s: 1, r: 1, m: 2 }, p: [ 2, 6, 11, 15 ], m: [4,4,4,1] },
-    { id: { t: 1, p: 1, s: 1, r: 1, m: 3 }, p: [ 3, 7, 10, 14 ], m: [4,4,4,1] },
-    { id: { t: 1, p: 1, s: 1, r: 1, m: 4 }, p: [ 4, 8,  9, 13 ], m: [4,4,4,1] }
-  ]; // do it after scoring once to see we actually get the used matches
-
   verifyStageProgression();
 
-  t.deepEqual(trn.matches, expR1, "first stage copied into global matches array");
-
-  var d2 = trn.currentRound();
-  t.ok(!trn.isTieBreakerRound(), "ffa round 2");
-  var expR2 = [
-    { id: { s: 1, r: 1, m: 1 }, p: [ 1, 4, 9, 12 ] },
-    { id: { s: 1, r: 1, m: 2 }, p: [ 2, 5, 8, 11 ] },
-    { id: { s: 1, r: 1, m: 3 }, p: [ 3, 6, 7, 10 ] }
-  ];
-  t.deepEqual(d2.matches, expR2, "current stage gets the top 3*16/4 pls");
-
-  d2.matches.forEach(function (m) {
-    d2.score(m.id, [4,3,3,1]); // causes tiebreakers between 2nds and 3rds
+  // t2 - FFA (12p)
+  t.ok(trn.inFFA() && !trn.inTieBreaker() && !trn.inFinal(), 't2 is FFA');
+  var expR2 = FFA(12, { sizes: [4] }).matches;
+  t.deepEqual(trn.matches, expR2, "current stage gets the top 3*16/4 pls");
+  trn.matches.forEach(function (m) {
+    trn.score(m.id, [4,3,3,1]); // causes tiebreakers between 2nds and 3rds
   });
-
   verifyStageProgression();
 
-  t.equal(trn.matches.length, expR1.length + expR2.length, "round 2 copied in");
-  expR2.forEach(function (m) {
-    m.id.t = 2;
-    m.id.p = 1;
-    m.m = [4,3,3,1];
-  });
-  t.deepEqual(trn.matches.slice(expR1.length), expR2, "r2 matches extended in d");
-
-
-  // know this is sufficient to verify it's a TB because 1st placers not present
+  // t3 - TieBreaker (6p subset of previous 12p - [2nd, 3rd] placers)
+  t.ok(!trn.inFFA() && trn.inTieBreaker() && !trn.inFinal(), 't3 is TieBreaker');
   var expR3Tb = [
     { id : { s: 1, r: 1, m: 1 }, p : [4,9] },
     { id : { s: 2, r: 1, m: 1 }, p : [5,8] },
     { id : { s: 3, r: 1, m: 1 }, p : [6,7] }
   ];
-  var d3 = trn.currentRound();
-  t.ok(trn.isTieBreakerRound(), "tb round 1");
-  t.deepEqual(d3.matches, expR3Tb, "current stage is a tiebreaker");
-
-  d3.matches.forEach(function (m) {
-    d3.score(m.id, [2,2]); // should ensure another tiebreaker - nothing resolved
+  t.deepEqual(trn.matches, expR3Tb, "current stage is a tiebreaker");
+  trn.matches.forEach(function (m) {
+    trn.score(m.id, [2,2]); // should ensure another tiebreaker - nothing resolved
   });
-
   verifyStageProgression();
 
-  var d4 = trn.currentRound();
-  t.ok(trn.isTieBreakerRound(), "tb round 2");
-  t.deepEqual(d4.matches, expR3Tb, "r4TB === r3TB");
-
-  d4.matches.forEach(function (m) {
-    d4.score(m.id, [2,1]); // resolve ties now
+  // t4 - TieBreaker (6p - same as previous)
+  t.ok(!trn.inFFA() && trn.inTieBreaker() && !trn.inFinal(), 't4 is TieBreaker');
+  t.deepEqual(trn.matches, expR3Tb, "t4 === t3");
+  trn.matches.forEach(function (m) {
+    trn.score(m.id, [2,1]); // resolve ties (top 6 in T5)
   });
-
   verifyStageProgression();
 
-  var expR5 = [
-    { id: { s: 1, r: 1, m: 1 }, p: [ 1, 3, 6 ] },
-    { id: { s: 1, r: 1, m: 2 }, p: [ 2, 4, 5 ] },
-  ];
-  var d5 = trn.currentRound();
-  t.ok(!trn.isTieBreakerRound(), "ffa round 3");
-  t.deepEqual(d5.matches, expR5, "3rd FFA round matches");
-
-  d5.matches.forEach(function (m) {
-    d5.score(m.id, [3,3,1]); // top 2 progresses
+  // t5 - FFA (6p - top 6 as decided by tiebreaker)
+  t.ok(trn.inFFA() && !trn.inTieBreaker() && !trn.inFinal(), 't5 is FFA');
+  var expR5 = FFA(6, { sizes: [3] }).matches;
+  t.deepEqual(trn.matches, expR5, "3rd FFA round matches");
+  trn.matches.forEach(function (m) {
+    trn.score(m.id, [3,3,1]); // top 2 progresses
   });
-
   verifyStageProgression();
 
+  // t6 - FFA (4p)
+  t.ok(trn.inFFA() && !trn.inTieBreaker() && trn.inFinal(), 't6 is final FFA');
+  var expR6 = FFA(4, { sizes: [4] }).matches;
+  t.deepEqual(trn.matches, expR6, "final match contains the top 4 seeds");
+  trn.score(trn.matches[0].id, [4,3,3,3]); // score s.t. final tiebreaker necessary
+  verifyStageProgression();
 
-  var d6 = trn.currentRound();
-  t.ok(!trn.isTieBreakerRound(), "ffa round 4");
-  t.deepEqual(d6.matches, [{
-    id: { s: 1, r: 1, m: 1 },
-    p: [1,2,3,4]
-  }], "final match contains the top 4");
+  // t7 - TieBreaker (3p subset of previous 4p - [2nd, 3rd, 4th] placers)
+  t.ok(!trn.inFFA() && trn.inTieBreaker() && trn.inFinal(), 't7 is final TB');
+  var expR7Tb = [ { id : { s: 1, r: 1, m: 1 }, p : [2, 3, 4] } ];
+  t.deepEqual(trn.matches, expR7Tb, "t7 contains 2nd-4th placers tb");
+  t.ok(trn.score(trn.matches[0].id, [3,3,1]), "score s.t. smaller tb necessary");
+  verifyStageProgression();
 
-  var f = d6.matches[0];
-  d6.score(f.id, [4,3,2,1]); // TODO: what about final round ties? - limits?
+  // t8 - TieBreaker (2p subset with the top 2 from previous 3p tb)
+  t.ok(!trn.inFFA() && trn.inTieBreaker() && trn.inFinal(), 't8 is final TB');
+  var expR8Tb = [ { id : { s: 1, r: 1, m: 1 }, p : [2, 3] } ];
+  t.deepEqual(trn.matches, expR8Tb, "t8 contains 2nd-3rd placers from t6");
+  t.ok(trn.score(trn.matches[0].id, [1,2]), "score s.t. done");
 
   // ensure everthing done
-  t.ok(trn.stageComplete(), "final FFA complete");
-  t.ok(trn.isDone(), "dynamic FFA complete");
-  t.ok(!trn.createNextStage(), "can't create more stages");
+  t.ok(trn.stageDone(), "final FFA complete");
+  t.ok(trn.isDone(), "tourney complete");
+  trn.complete();
 
-  t.deepEqual(trn.matches[trn.matches.length-1].id, { t: 6, p: 1, s: 1, r: 1, m: 1 }
-    , "final match copied in correct location"
-  );
+  // and verify that the top 2 can be unambiguously chosen
+  var top2 = trn.results().filter(function (r) {
+    return r.pos <= 2;
+  });
+  t.deepEqual($.pluck('pos', top2), [1,2], 'have two players winning');
+  t.deepEqual($.pluck('seed', top2), [1,3], 'seed 3 won the last breaker');
+
+  t.done();
+};
+
+exports.noLimitNoBreakers = function (t) {
+  var ffaOpts = { sizes: [4, 4], advancers: [1] };
+  var trn = new FfaTb(16, ffaOpts);
+
+  trn.matches.forEach(function (m) {
+    t.ok(trn.score(m.id, [4,3,2,1]), m.id + ' scored');
+  });
+  t.ok(trn.stageDone(), 't1 done');
+
+  trn.createNextStage();
+  trn.matches.forEach(function (m) {
+    t.ok(trn.score(m.id, [4,4,2,2]), m.id + ' scored');
+  });
+
+  t.ok(trn.stageDone(), 't2 done');
+  t.ok(trn.isDone(), 'tourney done');
+  trn.complete();
 
   t.done();
 };

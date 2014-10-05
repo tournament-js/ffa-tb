@@ -7,7 +7,7 @@ exports.invalidsThrow = function (t) {
     new FfaTb(1);
   }
   catch (e) {
-    t.equal(e.message, "Cannot construct FfaTb: " + reason, 'reason in error.message');
+    t.equal(e.message, "Cannot construct FfaTb: " + reason, 'error.message');
   }
   t.equal(FfaTb.invalid(1), reason, ".invalid returns reason");
   t.done();
