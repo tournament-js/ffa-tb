@@ -8,7 +8,8 @@ var FfaTb = Tourney.sub('FfaTb', function (opts, initParent) {
   this.adv = opts.advancers;
   this.sizes = opts.sizes;
   this.limit = opts.limit;
-  initParent(new FFA(this.numPlayers, opts));
+  initParent(new FFA(this.numPlayers, { sizes: [opts.sizes[0]] }));
+  this.splits = [this.matches.length];
 });
 
 FfaTb.configure({
@@ -40,19 +41,18 @@ FfaTb.prototype._mustPropagate = function () {
   // regardless of current instance type:
   // only stop if last ffa round played and we no longer need tiebreaking
   return !this.inFinal() ||
-         (!this.limit || !TieBreaker.isNecessary(this._inst, this.limit));
+         (this.limit && TieBreaker.isNecessary(this._inst, this.limit));
 };
 
 FfaTb.prototype._createNext = function () {
   // only called when _mustPropagate && stageComplete
   // regardless of current instance type: if we need tiebreaking tiebreak:
-  var adv = this.inFinal() ?
-    this.limit :
-    this.advancers[this.ffaStage] * this._inst.matches.length ;
+  var adv = this.inFinal() ? this.limit :
+    this.adv[this.ffaStage-1] * this.splits[this.ffaStage-1] ;
   // keep trying to tiebreak because if it works - we have to do it:
-  var tb = TieBreaker.from(this._inst, adv, { nonStrict: true });
-  if (tb.matches.length > 0) {
-    return tb;
+
+  if (TieBreaker.isNecessary(this._inst, adv)) {
+    return TieBreaker.from(this._inst, adv, { nonStrict: true });
   }
 
   // phew - can actually proceed to next ffaStage now
@@ -64,7 +64,9 @@ FfaTb.prototype._createNext = function () {
     throw new Error("FfaTb instance corrupt: " + JSON.stringify(this));
   }
   this.ffaStage += 1;
-  return FFA.from(this._inst, adv, { sizes: [nextSize] });
+  var ffa = FFA.from(this._inst, adv, { sizes: [nextSize] });
+  this.splits.push(ffa.matches.length);
+  return ffa;
 };
 
 //------------------------------------------------------------------
