@@ -21,10 +21,10 @@
   "dependencies": {
     "tourney": "^1.0.0-2",
     "tiebreaker": "^2.1.0",
-    "ffa": "^2.1.0",
-    "autonomy": "^1.0.0"
+    "ffa": "^2.1.0"
   },
   "devDependencies": {
+    "autonomy": "^1.0.0",
     "coveralls": "^2.11.1",
     "jscoverage": "^0.5.5",
     "nodeunit": "^0.9.0"
