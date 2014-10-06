@@ -63,7 +63,7 @@ exports.resultsEightFourTies = function (t) {
   t.deepEqual(trn.matches, [{ id : { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], "t3");
   trn.score(trn.matches[0].id, [4,3,2,1]);
 
-  t.ok(trn.isDone());
+  t.ok(trn.isDone(), 'done');
   trn.complete();
 
   var res = trn.results();
