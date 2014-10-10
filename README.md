@@ -7,14 +7,28 @@
 
 An implementation of [tourney](https://github.com/clux/tourney). This module is basically [FFA](https://github.com/clux/ffa) interspersed with [TieBreaker](https://github.com/clux/tiebreaker) rounds after each FFA round to avoid the artificial advancer limit in the fixed size `FFA` [tournament](https://github.com/clux/tournament).
 
-## Installation
-Install locally from npm:
+## Highlevel Usage
+Use like `FFA`, but without concern for ties:
 
-```bash
-$ npm install ffa-tb --save
+```js
+var FFA = require('ffa-tb');
+var trn = new FFA(16, { sizes: [4, 4], limit: 2 }); // 2+ rounds
+// score trn.matches until trn.stageDone()
+while (!trn.isDone()) {
+  // trn will automatically tiebreak for us if needed
+  // or it will present the next round in the FFA tournament as the next stage
+  trn.createNextStage();
+  // score trn.matches until trn.stageDone()
+}
+trn.complete(); // seal
 ```
 
-## Usage
+In this case tiebreakers will be created when:
+
+- round 1 -> 2 when we cannot pick the winner of each match in round 1
+- round 2 could not determine top 2 after scoring and asking for next stage
+
+## Lowlevel Usage
 Use like any other [tourney](https://github.com/clux/tourney), with the initialization parameters being identical to those you'd normally send to [ffa](https://github.com/clux/ffa):
 
 ```js
@@ -45,6 +59,13 @@ trn.matches; // top 2 from each match in final
 ```
 
 Standard [Tourney](https://npmjs.org/tourney) API. [TieBreaker](https://npmjs.org/tiebreaker) rounds are interspearsed when necessary and entirely determined by if advancers can be chosen unambiguously. Otherwise, the only differences between [FFA](https://npmjs.org/ffa) is that you need to `createNextStage` occasionally, and that the `matches` array shifts to reflect the current round (and is thus easier to manage).
+
+## Installation
+Install locally from npm:
+
+```bash
+$ npm install ffa-tb --save
+```
 
 ## Running tests
 Install development dependencies
