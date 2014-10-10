@@ -2,7 +2,7 @@
   "name": "ffa-tb",
   "description": "FFA tourney with automatic tiebreakers between rounds",
   "author": "Eirik Albrigtsen <analsandblaster@gmail.com>",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "stability": "unstable",
   "repository": {
     "type": "git",
