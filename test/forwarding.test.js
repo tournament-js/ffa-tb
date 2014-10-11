@@ -95,6 +95,14 @@ exports.forwardingSlowSixteen = function (t) {
   t.deepEqual($.pluck('pos', top2), [1,2], 'have two players winning');
   t.deepEqual($.pluck('seed', top2), [1,3], 'seed 3 won the last breaker');
 
+  // verify that we can recreate a tournament at the last state
+  var copy = FfaTb.restore(16, ffaOpts, trn.state.slice());
+  t.deepEqual(copy.oldMatches, trn.oldMatches, 'restore works');
+
+  // verify that state actually does the right thing
+  var copy2 = FfaTb.restore(16, ffaOpts, trn.state.slice(0, -5));
+  t.equal(copy2.state.length, copy.state.length-5, "can restore to any point");
+
   t.done();
 };
 
