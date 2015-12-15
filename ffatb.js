@@ -14,9 +14,9 @@ FfaTb.configure({
   invalid: FFA.invalid
 });
 
-//------------------------------------------------------------------
+// ------------------------------------------------------------------
 // Stage identifiers
-//------------------------------------------------------------------
+// ------------------------------------------------------------------
 
 FfaTb.prototype.inFFA = function () {
   return this.getName(1) === 'FFA';
@@ -30,9 +30,9 @@ FfaTb.prototype.inFinal = function () {
   return !this.sizes[this.ffaStage];
 };
 
-//------------------------------------------------------------------
+// ------------------------------------------------------------------
 // Expected methods
-//------------------------------------------------------------------
+// ------------------------------------------------------------------
 
 FfaTb.prototype._mustPropagate = function (stg, inst, opts) {
   // regardless of current instance type:
@@ -45,7 +45,7 @@ FfaTb.prototype._createNext = function (stg, inst, opts) {
   // only called when _mustPropagate && stageComplete
   // regardless of current instance type: if we need tiebreaking tiebreak:
   var adv = this.inFinal() ? opts.limit :
-    opts.advancers[this.ffaStage-1] * this.splits[this.ffaStage-1] ;
+    opts.advancers[this.ffaStage-1] * this.splits[this.ffaStage-1];
   // keep trying to tiebreak because if it works - we have to do it:
 
   if (TieBreaker.isNecessary(inst, adv)) {
@@ -73,6 +73,6 @@ FfaTb.prototype._updateRes = function (r, prev) {
   // TODO: what to do about .gpos?
 };
 
-//------------------------------------------------------------------
+// ------------------------------------------------------------------
 
 module.exports = FfaTb;

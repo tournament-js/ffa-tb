@@ -3,7 +3,6 @@
   "description": "FFA tourney with automatic tiebreakers between rounds",
   "author": "Eirik Albrigtsen <analsandblaster@gmail.com>",
   "version": "1.1.0",
-  "stability": "unstable",
   "repository": {
     "type": "git",
     "url": "clux/ffa-tb"
@@ -15,8 +14,7 @@
   "main": "ffatb.js",
   "scripts": {
     "test": "nodeunit test/*.js --reporter=verbose",
-    "coverage": "jscoverage ffatb.js && FFATB_COV=1 nodeunit --reporter=lcov test",
-    "coveralls": "npm run coverage | coveralls"
+    "coverage": "jscoverage ffatb.js && FFATB_COV=1 nodeunit --reporter=lcov test"
   },
   "dependencies": {
     "tourney": "^1.1.0",
@@ -25,7 +23,6 @@
   },
   "devDependencies": {
     "autonomy": "^1.0.0",
-    "coveralls": "^2.11.1",
     "jscoverage": "^0.5.5",
     "nodeunit": "^0.9.0"
   },
