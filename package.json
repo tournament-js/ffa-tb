@@ -13,18 +13,19 @@
   ],
   "main": "ffatb.js",
   "scripts": {
-    "test": "nodeunit test/*.js --reporter=verbose",
-    "coverage": "jscoverage ffatb.js && FFATB_COV=1 nodeunit --reporter=lcov test"
+    "test": "bndg test/*.js",
+    "precoverage": "istanbul cover bndg test/*.test.js",
+    "coverage": "cat coverage/lcov.info && rm -rf coverage"
   },
   "dependencies": {
-    "tourney": "^1.1.0",
-    "tiebreaker": "^3.0.0",
-    "ffa": "^3.0.0"
+    "tourney": "^1.2.0",
+    "tiebreaker": "^3.1.0",
+    "ffa": "^3.2.0"
   },
   "devDependencies": {
     "autonomy": "^1.0.0",
-    "jscoverage": "^0.5.5",
-    "nodeunit": "^0.9.0"
+    "bandage": "^0.4.0",
+    "istanbul": "^0.4.1"
   },
   "bugs": {
     "url": "http://github.com/clux/ffa-tb/issues"

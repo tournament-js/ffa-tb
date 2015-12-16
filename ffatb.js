@@ -5,7 +5,11 @@ var Tourney = require('tourney');
 var FfaTb = Tourney.sub('FfaTb', function (opts, init) {
   this.ffaStage = 1;
   this.sizes = opts.sizes;
-  init(new FFA(this.numPlayers, { sizes: [opts.sizes[0]] }));
+  var ffaOpts = { sizes: [opts.sizes[0]] };
+  if (opts.log) {
+    ffaOpts.log = opts.log;
+  }
+  init(new FFA(this.numPlayers, ffaOpts));
   this.splits = [this.matches.length];
 });
 
@@ -49,14 +53,15 @@ FfaTb.prototype._createNext = function (stg, inst, opts) {
   // keep trying to tiebreak because if it works - we have to do it:
 
   if (TieBreaker.isNecessary(inst, adv)) {
-    return TieBreaker.from(inst, adv, { nonStrict: true });
+    var tbOpts = { nonStrict: true, log: this._opts.log };
+    return TieBreaker.from(inst, adv, tbOpts);
   }
 
   // phew - can actually proceed to next ffaStage now
   var nextSize = this.sizes[this.ffaStage];
   // nextSize is defined because _mustPropagate => !inFinal
   this.ffaStage += 1;
-  var ffa = FFA.from(inst, adv, { sizes: [nextSize] });
+  var ffa = FFA.from(inst, adv, { sizes: [nextSize], log: this._opts.log });
   this.splits.push(ffa.matches.length); // keep track so we can work out next adv
   return ffa;
 };

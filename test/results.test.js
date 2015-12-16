@@ -1,20 +1,27 @@
-var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
+var FfaTb = require('..')
+  , FFA = require('ffa')
+  , ffaId = (r, m) => new FFA.Id(r, m)
+  , TB = require('tiebreaker')
+  , tbId = (s) => new TB.Id(s, 1, 1, true)
+  , $ = require('autonomy')
+  , test = require('bandage');
 
-exports.resultsEightFour = function (t) {
+test('resultsEightFour', function *(t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
   t.deepEqual(trn.matches, [
-    { id: { s: 1, r: 1, m: 1 }, p: [1,3,6,8] },
-    { id: { s: 1, r: 1, m: 2 }, p: [2,4,5,7] }],
+    { id: ffaId(1, 1), p: [1,3,6,8] },
+    { id: ffaId(1, 2), p: [2,4,5,7] }],
     't1 matches'
   );
+
   trn.score(trn.matches[0].id, [4,3,2,1]);
   trn.score(trn.matches[1].id, [4,3,2,1]);
   trn.createNextStage();
 
   // t2 - FFA
   t.ok(trn.inFFA(), 't2 is FFA');
-  t.deepEqual(trn.matches, [{id: {s: 1, r: 1, m: 1}, p: [1,2,3,4] }], 't2');
+  t.deepEqual(trn.matches, [{id: ffaId(1, 1), p: [1,2,3,4] }], 't2');
   trn.score(trn.matches[0].id, [4,3,2,1]);
 
   trn.complete(); // this is done now
@@ -34,16 +41,14 @@ exports.resultsEightFour = function (t) {
     { seed: 8, wins: 0, for: 1, against: 3, pos: 7 }],// 1
     'final results'
   );
+});
 
-  t.done();
-};
-
-exports.resultsEightFourTies = function (t) {
+test('resultsEightFourTies', function *(t) {
   // without tiebreakers
   var trn = new FfaTb(8, { sizes: [4, 4], advancers: [2] });
   t.deepEqual(trn.matches, [
-    { id: { s: 1, r: 1, m: 1 }, p: [1,3,6,8] },
-    { id: { s: 1, r: 1, m: 2 }, p: [2,4,5,7] }],
+    { id: ffaId(1, 1), p: [1,3,6,8] },
+    { id: ffaId(1, 2), p: [2,4,5,7] }],
     't1 matches'
   );
   trn.score(trn.matches[0].id, [4,4,2,2]);
@@ -53,14 +58,14 @@ exports.resultsEightFourTies = function (t) {
   // t2 - 2p TieBreaking t1m2 cluster
   t.ok(trn.inTieBreaker(), 'need to break the second match');
   t.ok(!trn.inFinal(), 'not final round');
-  t.deepEqual(trn.matches, [{ id: { s: 2, r: 1, m: 1 }, p: [4,5] }], 'tb match');
+  t.deepEqual(trn.matches, [{ id: tbId(2), p: [4,5] }], 'tb match');
   t.ok(trn.score(trn.matches[0].id, [1,2]), 'score tb');
   t.ok(trn.stageDone(), 'tb is done');
   // NB: scoring should not affect .for and .against
   t.ok(trn.createNextStage(), 'could create next stage');
 
   // t3 - 4p FFA with top 2 from T1M1 + winner of [T1M2, TB]
-  t.deepEqual(trn.matches, [{ id: { s: 1, r: 1, m: 1 }, p: [1,2,3,5] }], 't3');
+  t.deepEqual(trn.matches, [{ id: ffaId(1,1), p: [1,2,3,5] }], 't3');
   trn.score(trn.matches[0].id, [4,3,2,1]);
 
   t.ok(trn.isDone(), 'done');
@@ -84,6 +89,4 @@ exports.resultsEightFourTies = function (t) {
     { seed: 7, wins: 0, for: 1, against: 3, pos: 8 }],// 1
     'final results'
   );
-
-  t.done();
-};
+});

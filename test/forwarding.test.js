@@ -1,8 +1,11 @@
-var FfaTb = require(process.env.FFATB_COV ? '../ffatb-cov.js' : '../');
-var FFA = require('ffa');
-var $ = require('autonomy');
+var FfaTb = require('..')
+  , FFA = require('ffa')
+  , TB = require('tiebreaker')
+  , tbId = (s, r, m) => new TB.Id(s, r, m, false)
+  , $ = require('autonomy')
+  , test = require('bandage');
 
-exports.forwardingSlowSixteen = function (t) {
+test('forwardingSlowSixteen', function *(t) {
   var ffaOpts = { sizes: [4, 4, 4, 4], advancers: [3, 2, 2], limit: 2 };
   var trn = new FfaTb(16, ffaOpts);
   t.ok(!trn.stageDone(), 'need to play first round');
@@ -36,9 +39,9 @@ exports.forwardingSlowSixteen = function (t) {
   // t3 - TieBreaker (6p subset of previous 12p - [2nd, 3rd] placers)
   t.ok(!trn.inFFA() && trn.inTieBreaker() && !trn.inFinal(), 't3 is TieBreaker');
   var expR3Tb = [
-    { id: { s: 1, r: 1, m: 1 }, p: [4,9] },
-    { id: { s: 2, r: 1, m: 1 }, p: [5,8] },
-    { id: { s: 3, r: 1, m: 1 }, p: [6,7] }
+    { id: tbId(1, 1, 1), p: [4,9] },
+    { id: tbId(2, 1, 1), p: [5,8] },
+    { id: tbId(3, 1, 1), p: [6,7] }
   ];
   t.deepEqual(trn.matches, expR3Tb, 'current stage is a tiebreaker');
   trn.matches.forEach(function (m) {
@@ -72,14 +75,14 @@ exports.forwardingSlowSixteen = function (t) {
 
   // t7 - TieBreaker (3p subset of previous 4p - [2nd, 3rd, 4th] placers)
   t.ok(!trn.inFFA() && trn.inTieBreaker() && trn.inFinal(), 't7 is final TB');
-  var expR7Tb = [ { id: { s: 1, r: 1, m: 1 }, p: [2, 3, 4] } ];
+  var expR7Tb = [ { id: tbId(1, 1, 1), p: [2, 3, 4] } ];
   t.deepEqual(trn.matches, expR7Tb, 't7 contains 2nd-4th placers tb');
   t.ok(trn.score(trn.matches[0].id, [3,3,1]), 'score s.t. smaller tb necessary');
   verifyStageProgression();
 
   // t8 - TieBreaker (2p subset with the top 2 from previous 3p tb)
   t.ok(!trn.inFFA() && trn.inTieBreaker() && trn.inFinal(), 't8 is final TB');
-  var expR8Tb = [ { id: { s: 1, r: 1, m: 1 }, p: [2, 3] } ];
+  var expR8Tb = [ { id: tbId(1, 1, 1), p: [2, 3] } ];
   t.deepEqual(trn.matches, expR8Tb, 't8 contains 2nd-3rd placers from t6');
   t.ok(trn.score(trn.matches[0].id, [1,2]), 'score s.t. done');
 
@@ -102,11 +105,9 @@ exports.forwardingSlowSixteen = function (t) {
   // verify that state actually does the right thing
   var copy2 = FfaTb.restore(16, ffaOpts, trn.state.slice(0, -5));
   t.equal(copy2.state.length, copy.state.length-5, 'can restore to any point');
+});
 
-  t.done();
-};
-
-exports.noLimitNoBreakers = function (t) {
+test('noLimitNoBreakers', function *(t) {
   var ffaOpts = { sizes: [4, 4], advancers: [1] };
   var trn = new FfaTb(16, ffaOpts);
 
@@ -123,6 +124,4 @@ exports.noLimitNoBreakers = function (t) {
   t.ok(trn.stageDone(), 't2 done');
   t.ok(trn.isDone(), 'tourney done');
   trn.complete();
-
-  t.done();
-};
+});
