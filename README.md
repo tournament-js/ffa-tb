@@ -118,14 +118,14 @@ trn.complete();
 ```
 
 ## TieBreaker algorithm
-See [tiebreakers](https://github.com/clux/tiebreaker). Essentially, since we have established that we can play matches with more than 2 players, tiebreakers are `simple`, meaning they will make another (possibly) multiple player match which is a subset of the previous match.
+See [TieBreaker](https://github.com/clux/tiebreaker). Essentially, since we have established that we can play matches with more than 2 players, tiebreakers are `simple`, meaning they will make a single multiple  player match which is a subset of the previous match.
 
 This is different from default behaviour in [groupstage tiebreakers](https://github.com/clux/groupstage-tb) which actually require subgroups when there are multi-way ties.
 
 ## Modelling and tiebreaker matches
-In most cases, tiebreaker matches are the perfect fit for what you want to do, the matches can be played as instructed and a winner is eventually picked. However, sometimes this is not true:
+In most cases, tiebreaker matches resolve most conflicts with modelling, and maps nicely onto the physical world. However, sometimes this is not true:
 
-Suppose match tied, but external factors (not present in the map score) actually decided who broke. For this you have two optoins:
+Suppose a match tied, but external factors (not present in the map score) actually decided who broke. For such a situation you have two options:
 
  1. Use tiebreaker round as model only
 
@@ -151,9 +151,9 @@ Say you stick 10 players in a deatmatch server and want to take the pick the top
 
 Given the perfect fit of model and physical reality of the situation, this is were this module shines over plain `FFA`.
 
-You could technically still choose not to model this inside the module, and just present a final score that the final standings manually computed, i.e. the top 4 proceed + the winner of the tiebreaker match. E.g. if the scores were `[10,9,8,7,6,6,6,3,2,1]` and the tie resolver `[3,2,1]`, you could just score the match as `[10,9,8,7,6,5,4,3,2,1]` and gloss over the details.
+You could technically still choose not to model this inside the module, and present an amalgamated final score that combine the score the tiebreaker yourself; i.e. if the scores were `[10,9,8,7,6,6,6,3,2,1]` and the tie resolver `[3,2,1]`, you could just score the match as `[10,9,8,7,6,5,4,3,2,1]` and gloss over the details.
 
-This seems silly though. This module will formalize manual tiebreaking processes, provide transparency, and can limit the time needed for organizers to work out this kind of stuff.
+Doing so would be a little silly though. This module will formalize manual tiebreaking processes, provide transparency, and can limit the time needed for organizers to work out this kind of stuff.
 
 ## Installation
 Install from npm:
