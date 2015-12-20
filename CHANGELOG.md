@@ -1,3 +1,7 @@
+1.2.1 / 2015-12-20
+==================
+  * Documentation release
+
 1.2.0 / 2015-12-16
 ==================
   * Bump tourney, ffa, tiebreaker for configurable `log`
