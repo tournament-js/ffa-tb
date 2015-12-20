@@ -117,10 +117,10 @@ At any rate, this example is over, let's lock it down so no one comes around lat
 trn.complete();
 ```
 
-## TieBreaker algorithm
-See [TieBreaker](https://github.com/clux/tiebreaker). Essentially, since we have established that we can play matches with more than 2 players, tiebreakers are `simple`, meaning they will make a single multiple  player match which is a subset of the previous match.
+## Tiebreaker algorithm
+See [tiebreaker module](https://github.com/clux/tiebreaker). We will break the smallest cluster necessary to determine the top `n` players where `n` is the current advancers number or the `limit` in the final round.
 
-This is different from default behaviour in [groupstage tiebreakers](https://github.com/clux/groupstage-tb) which actually require subgroups when there are multi-way ties.
+Since we have established that we can play matches with more than 2 players, tiebreakers are `simple`, meaning they will make a single multiple  player match which is a subset of the previous match. This is different from default behaviour in [groupstage tiebreakers](https://github.com/clux/groupstage-tb) which actually require subgroups when there are multi-way ties.
 
 ## Modelling and tiebreaker matches
 In most cases, tiebreaker matches resolve most conflicts with modelling, and maps nicely onto the physical world. However, sometimes this is not true:
