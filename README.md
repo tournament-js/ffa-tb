@@ -151,9 +151,9 @@ Say you stick 10 players in a deatmatch server and want to take the pick the top
 
 Given the perfect fit of model and physical reality of the situation, this is were this module shines over plain `FFA`.
 
-You could technically still choose not to model this inside the module, and present an amalgamated final score that combine the score the tiebreaker yourself; i.e. if the scores were `[10,9,8,7,6,6,6,3,2,1]` and the tie resolver `[3,2,1]`, you could just score the match as `[10,9,8,7,6,5,4,3,2,1]` and gloss over the details.
+You could technically still choose not to model this inside the module, and present an amalgamated final score; i.e. if the scores were `[10,9,8,7,6,6,6,3,2,1]` and the tie resolver `[3,2,1]`, you could just score the match as `[10,9,8,7,6,5,4,3,2,1]` and gloss over the details.
 
-Doing so would be a little silly though. This module will formalize manual tiebreaking processes, provide transparency, and can limit the time needed for organizers to work out this kind of stuff.
+Doing so would be a little silly though. This module can formalize manual tiebreaking processes, provide transparency, and can limit the time needed for organizers to work out this kind of stuff.
 
 ## Installation
 Install from npm:
