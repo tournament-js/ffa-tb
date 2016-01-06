@@ -29,7 +29,7 @@ test('invalidsThrow', function *(t) {
 test('scoring logs', function *(t) {
   var logCatch = {
     error: function () {
-      t.pass('got error log from construct');
+      t.pass('got error log from scoring');
     }
   };
   t.plan(2*3 + 3); // 2 times amounts of fail scores + misc
