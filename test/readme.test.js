@@ -3,7 +3,6 @@ var FfaTb = require('..')
   , fId = (r, m) => new FFA.Id(r, m)
   , TB = require('tiebreaker')
   , tbId = (s) => new TB.Id(s, 1, 1, true)
-  , $ = require('autonomy')
   , test = require('bandage');
 
 test('readme', function *(t) {
